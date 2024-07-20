@@ -2,20 +2,20 @@ version: '3'
 
 services:
   inference:
-    container_name: net1-worker1-inference
+    container_name: net1-worker3-inference
     build:
       context: .
     command: python -u /app/app.py
     ports:
-      - "8011:8011"
+      - "8013:8013"
     networks:
-      net1-worker1:
+      net1-worker3:
         aliases:
           - inference
-        ipv4_address: 172.31.0.2
+        ipv4_address: 172.33.0.2
     healthcheck:
-      # test: ["CMD", "curl", "-f", "http://localhost:8011/inference/ETH"]
-      test: ["CMD-SHELL", "curl -f http://localhost:8011/inference/ETH || exit 1 && curl -f http://localhost:8011/inference/BTC || exit 1 && curl -f http://localhost:8011/inference/SOL || exit 1"]
+      # test: ["CMD", "curl", "-f", "http://localhost:8013/inference/ETH"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8013/inference/ETH || exit 1 && curl -f http://localhost:8013/inference/BNB || exit 1 && curl -f http://localhost:8013/inference/ARB || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -24,10 +24,10 @@ services:
       - ./inference-data:/app/data
   
   updater:
-    container_name: net1-updater1
+    container_name: net1-updater3
     build: .
     environment:
-      - INFERENCE_API_ADDRESS=http://inference:8011
+      - INFERENCE_API_ADDRESS=http://inference:8013
     command: >
       sh -c "
       while true; do
@@ -39,15 +39,15 @@ services:
       inference:
         condition: service_healthy
     networks:
-      net1-worker1:
+      net1-worker3:
         aliases:
           - updater
-        ipv4_address: 172.31.0.3
+        ipv4_address: 172.33.0.3
     
-  worker_topic_1:
-    container_name: net1-worker1-topic-1
+  worker_topic_7:
+    container_name: net1-worker3-topic-7
     environment:
-      - INFERENCE_API_ADDRESS=http://inference:8011
+      - INFERENCE_API_ADDRESS=http://inference:8013
       - HOME=/data
     build:
       context: .
@@ -64,31 +64,31 @@ services:
         fi
         allora-node --role=worker --peer-db=/data/peerdb --function-db=/data/function-db \
           --runtime-path=/app/runtime --runtime-cli=bls-runtime --workspace=/data/workspace \
-          --private-key=/data/keys/priv.bin --log-level=debug --port=9101 \
+          --private-key=/data/keys/priv.bin --log-level=debug --port=9107 \
           --boot-nodes=/dns/head-0-p2p.testnet-1.testnet.allora.network/tcp/32130/p2p/12D3KooWLBhsSucVVcyVCaM9pvK8E7tWBM9L19s7XQHqqejyqgEC,/dns/head-1-p2p.testnet-1.testnet.allora.network/tcp/32131/p2p/12D3KooWEUNWg7YHeeCtH88ju63RBfY5hbdv9hpv84ffEZpbJszt,/dns/head-2-p2p.testnet-1.testnet.allora.network/tcp/32132/p2p/12D3KooWATfUSo95wtZseHbogpckuFeSvpL4yks6XtvrjVHcCCXk \
-          --topic=allora-topic-1-worker \
+          --topic=allora-topic-7-worker \
           --allora-chain-key-name=net1_worker \
-          --allora-chain-restore-mnemonic='just clap slim ...' \
-          --allora-chain-topic-id=1 \
-          --allora-node-rpc-address=https://allora-rpc.testnet-1.testnet.allora.network \
+          --allora-chain-restore-mnemonic='human found choose stairs crane tenant sense scan erase tuna pledge need torch float cube book scout spatial pottery monitor pink hero dune wear' \
+          --allora-chain-topic-id=7 \
+          --allora-node-rpc-address=http://allora-testnet-1-rpc.testnet.nodium.xyz:26657 \
           --allora-chain-worker-mode=worker
     volumes:
-      - ./worker-topic-1-data:/data
+      - ./worker-topic-7-data:/data
     working_dir: /data
     depends_on:
       - inference
     ports:
-      - "9101:9101"
+      - "9107:9107"
     networks:
-      net1-worker1:
+      net1-worker3:
         aliases:
-          - worker_topic_1
-        ipv4_address: 172.31.0.21
+          - worker_topic_7
+        ipv4_address: 172.33.0.21
 
-  worker_topic_3:
-    container_name: net1-worker1-topic-3
+  worker_topic_8:
+    container_name: net1-worker3-topic-8
     environment:
-      - INFERENCE_API_ADDRESS=http://inference:8011
+      - INFERENCE_API_ADDRESS=http://inference:8013
       - HOME=/data
     build:
       context: .
@@ -105,31 +105,31 @@ services:
         fi
         allora-node --role=worker --peer-db=/data/peerdb --function-db=/data/function-db \
           --runtime-path=/app/runtime --runtime-cli=bls-runtime --workspace=/data/workspace \
-          --private-key=/data/keys/priv.bin --log-level=debug --port=9103 \
+          --private-key=/data/keys/priv.bin --log-level=debug --port=9108 \
           --boot-nodes=/dns/head-0-p2p.testnet-1.testnet.allora.network/tcp/32130/p2p/12D3KooWLBhsSucVVcyVCaM9pvK8E7tWBM9L19s7XQHqqejyqgEC,/dns/head-1-p2p.testnet-1.testnet.allora.network/tcp/32131/p2p/12D3KooWEUNWg7YHeeCtH88ju63RBfY5hbdv9hpv84ffEZpbJszt,/dns/head-2-p2p.testnet-1.testnet.allora.network/tcp/32132/p2p/12D3KooWATfUSo95wtZseHbogpckuFeSvpL4yks6XtvrjVHcCCXk \
-          --topic=allora-topic-3-worker \
+          --topic=allora-topic-8-worker \
           --allora-chain-key-name=net1_worker \
-          --allora-chain-restore-mnemonic='just clap slim ...' \
-          --allora-chain-topic-id=3 \
-          --allora-node-rpc-address=https://allora-rpc.testnet-1.testnet.allora.network \
+          --allora-chain-restore-mnemonic='human found choose stairs crane tenant sense scan erase tuna pledge need torch float cube book scout spatial pottery monitor pink hero dune wear' \
+          --allora-chain-topic-id=8 \
+          --allora-node-rpc-address=http://allora-testnet-1-rpc.testnet.nodium.xyz:26657 \
           --allora-chain-worker-mode=worker
     volumes:
-      - ./worker-topic-3-data:/data
+      - ./worker-topic-8-data:/data
     working_dir: /data
     depends_on:
       - inference
     ports:
-      - "9103:9103"
+      - "9108:9108"
     networks:
-      net1-worker1:
+      net1-worker3:
         aliases:
-          - worker_topic_3
-        ipv4_address: 172.31.0.23
+          - worker_topic_8
+        ipv4_address: 172.33.0.23
 
-  worker_topic_5:
-    container_name: net1-worker1-topic-5
+  worker_topic_9:
+    container_name: net1-worker3-topic-9
     environment:
-      - INFERENCE_API_ADDRESS=http://inference:8011
+      - INFERENCE_API_ADDRESS=http://inference:8013
       - HOME=/data
     build:
       context: .
@@ -146,36 +146,36 @@ services:
         fi
         allora-node --role=worker --peer-db=/data/peerdb --function-db=/data/function-db \
           --runtime-path=/app/runtime --runtime-cli=bls-runtime --workspace=/data/workspace \
-          --private-key=/data/keys/priv.bin --log-level=debug --port=9105 \
+          --private-key=/data/keys/priv.bin --log-level=debug --port=9109 \
           --boot-nodes=/dns/head-0-p2p.testnet-1.testnet.allora.network/tcp/32130/p2p/12D3KooWLBhsSucVVcyVCaM9pvK8E7tWBM9L19s7XQHqqejyqgEC,/dns/head-1-p2p.testnet-1.testnet.allora.network/tcp/32131/p2p/12D3KooWEUNWg7YHeeCtH88ju63RBfY5hbdv9hpv84ffEZpbJszt,/dns/head-2-p2p.testnet-1.testnet.allora.network/tcp/32132/p2p/12D3KooWATfUSo95wtZseHbogpckuFeSvpL4yks6XtvrjVHcCCXk \
-          --topic=allora-topic-5-worker \
+          --topic=allora-topic-9-worker \
           --allora-chain-key-name=net1_worker \
-          --allora-chain-restore-mnemonic='just clap slim ...' \
-          --allora-chain-topic-id=5 \
-          --allora-node-rpc-address=https://allora-rpc.testnet-1.testnet.allora.network \
+          --allora-chain-restore-mnemonic='human found choose stairs crane tenant sense scan erase tuna pledge need torch float cube book scout spatial pottery monitor pink hero dune wear' \
+          --allora-chain-topic-id=9 \
+          --allora-node-rpc-address=http://allora-testnet-1-rpc.testnet.nodium.xyz:26657 \
           --allora-chain-worker-mode=worker
     volumes:
-      - ./worker-topic-5-data:/data
+      - ./worker-topic-9-data:/data
     working_dir: /data
     depends_on:
       - inference
     ports:
-      - "9105:9105"
+      - "9109:9109"
     networks:
-      net1-worker1:
+      net1-worker3:
         aliases:
-          - worker_topic_5
-        ipv4_address: 172.31.0.25
+          - worker_95
+        ipv4_address: 172.33.0.25
   
 networks:
-  net1-worker1:
+  net1-worker3:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.31.0.0/24
+        - subnet: 172.33.0.0/24
 
 volumes:
   inference-data:
-  worker-topic-1-data:
-  worker-topic-3-data:
-  worker-topic-5-data:
+  worker-topic-7-data:
+  worker-topic-8-data:
+  worker-topic-9-data:

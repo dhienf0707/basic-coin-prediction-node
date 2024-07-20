@@ -7,6 +7,6 @@ logs/*
 keys
 data
 inference-data
-worker-data
+worker*-data
 head-data
 lib

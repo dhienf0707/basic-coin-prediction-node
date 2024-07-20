@@ -88,8 +88,8 @@ def train_model(token):
     # Set the date column as the index for resampling
     price_data.set_index("date", inplace=True)
 
-    # Resample the data to 10-minute frequency and compute the mean price
-    df = price_data.resample('10T').mean()
+    # Resample the data to 20-minute frequency and compute the mean price
+    df = price_data.resample('20T').mean()
 
     # Reset the index to have 'date' as a column again
     df.reset_index(inplace=True)
@@ -124,7 +124,7 @@ def train_model(token):
     print(f"Forecasted price for {token}: {forecast_price[token]}")
 
 def update_data():
-    tokens = ["ETH", "BTC", "SOL"]
+    tokens = ["ETH", "BNB", "ARB"]
     for token in tokens:
         download_data(token)
         format_data(token)
